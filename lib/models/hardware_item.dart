@@ -17,10 +17,10 @@ class HardwareItem {
 
   factory HardwareItem.fromJson(Map<String, dynamic> json) {
     return HardwareItem(
-      id: json['id'],
+      id: json['id'] ?? 0,
       name: json['name'] ?? 'Unknown',
       type: json['type'] ?? 'Misc',
-      price: (json['price'] as num).toDouble(),
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
       brand: json['brand'] ?? 'Generic',
       imageUrl: json['image_url'] ?? '',
     );
