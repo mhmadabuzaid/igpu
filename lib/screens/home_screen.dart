@@ -4,6 +4,7 @@ import 'package:igpu/providers/auth_provider.dart';
 import 'package:igpu/providers/hardware_provider.dart';
 import 'package:igpu/providers/cart_provider.dart';
 import 'package:igpu/screens/cartscreen.dart';
+import 'package:igpu/screens/orders_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -51,6 +52,18 @@ class HomeScreen extends ConsumerWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const CartScreen()),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.receipt_long,
+              color: Colors.purpleAccent,
+            ), // Purple for history
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const OrdersScreen()),
               );
             },
           ),

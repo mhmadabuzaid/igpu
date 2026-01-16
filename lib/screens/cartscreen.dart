@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/cart_provider.dart';
+import '../providers/order_provider.dart';
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 1. Get the Cart Items
     final cartItems = ref.watch(cartProvider);
-
-    // 2. Calculate Total Price
     final total = cartItems.fold(0.0, (sum, item) => sum + item.price);
 
     // Theme Colors
@@ -24,7 +22,7 @@ class CartScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          'ASSEMBLY BAY', // Sci-fi name for "Cart"
+          'ASSEMBLY BAY',
           style: TextStyle(
             color: neonColor,
             letterSpacing: 2,
@@ -38,9 +36,9 @@ class CartScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.computer, size: 80, color: Colors.white24),
-                  SizedBox(height: 20),
-                  Text(
+                  const Icon(Icons.computer, size: 80, color: Colors.white24),
+                  const SizedBox(height: 20),
+                  const Text(
                     'NO COMPONENTS DETECTED',
                     style: TextStyle(color: Colors.white54, letterSpacing: 1.5),
                   ),
@@ -49,7 +47,6 @@ class CartScreen extends ConsumerWidget {
             )
           : Column(
               children: [
-                // THE LIST
                 Expanded(
                   child: ListView.builder(
                     itemCount: cartItems.length,
@@ -66,40 +63,30 @@ class CartScreen extends ConsumerWidget {
                           border: Border.all(color: Colors.white10),
                         ),
                         child: ListTile(
-                          contentPadding: const EdgeInsets.all(10),
                           leading: ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: Image.network(
                               item.imageUrl,
-                              width: 60,
-                              height: 60,
+                              width: 50,
+                              height: 50,
                               fit: BoxFit.cover,
-                              cacheWidth: 150, // Optimize memory
-                              errorBuilder: (c, e, s) => Container(
-                                width: 60,
-                                height: 60,
-                                color: Colors.grey[900],
-                                child: Icon(
-                                  Icons.broken_image,
-                                  size: 20,
-                                  color: Colors.white54,
-                                ),
+                              cacheWidth: 150,
+                              errorBuilder: (c, e, s) => const Icon(
+                                Icons.broken_image,
+                                color: Colors.white24,
                               ),
                             ),
                           ),
                           title: Text(
                             item.name,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: const TextStyle(color: Colors.white),
                           ),
                           subtitle: Text(
-                            '${item.brand} // ${item.price} JOD',
-                            style: TextStyle(color: neonColor.withOpacity(0.7)),
+                            '${item.price} JOD',
+                            style: TextStyle(color: neonColor),
                           ),
                           trailing: IconButton(
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.remove_circle_outline,
                               color: Colors.redAccent,
                             ),
@@ -114,8 +101,6 @@ class CartScreen extends ConsumerWidget {
                     },
                   ),
                 ),
-
-                // THE FOOTER (Total & Checkout)
                 Container(
                   padding: const EdgeInsets.all(25),
                   decoration: BoxDecoration(
@@ -123,25 +108,15 @@ class CartScreen extends ConsumerWidget {
                     border: Border(
                       top: BorderSide(color: neonColor.withOpacity(0.3)),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: neonColor.withOpacity(0.1),
-                        blurRadius: 20,
-                        offset: Offset(0, -5),
-                      ),
-                    ],
                   ),
                   child: Column(
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
+                          const Text(
                             'SYSTEM TOTAL',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              letterSpacing: 1,
-                            ),
+                            style: TextStyle(color: Colors.white70),
                           ),
                           Text(
                             '$total JOD',
@@ -161,26 +136,28 @@ class CartScreen extends ConsumerWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: neonColor,
                             foregroundColor: Colors.black,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
                           ),
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Payment Gateway not implemented yet!',
+                          // 2. THE REAL CHECKOUT LOGIC
+                          onPressed: () async {
+                            await ref
+                                .read(orderProvider.notifier)
+                                .checkout(cartItems, total);
+                            if (context.mounted) {
+                              Navigator.pop(context); // Close Cart
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: backgroundColor,
+                                  content: Text(
+                                    'TRANSACTION RECORDED',
+                                    style: TextStyle(color: neonColor),
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           },
-                          child: Text(
+                          child: const Text(
                             'INITIALIZE CHECKOUT',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              letterSpacing: 1.5,
-                            ),
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
